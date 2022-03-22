@@ -1,0 +1,24 @@
+#!/bin/bash
+
+ExitUsage() {
+	echo "Usage: waes256 [encrypt/decrypt] [INPUT FILE] [OUTPUT FILE]"
+  exit 1
+}
+
+if [[ $# -ne 3 ]]; then
+  echo "Incorrect number of arguments"
+  ExitUsage
+elif [[ $1 != "encrypt" && $1 != "decrypt" ]]; then
+  echo "Bad argument: $1"
+  ExitUsage
+fi
+
+if [[ $1 == "encrypt" ]]; then 
+  # Encrypt command.
+  echo "Encrypting $1"
+  openssl enc -aes-256-cbc -md sha512 -pbkdf2 -iter 80000 -salt -in $2 -out $3 -base64
+else # $1 == "decrypt"
+  # Decrypt command.
+  echo "Decrypting $1"
+  openssl enc -aes-256-cbc -md sha512 -pbkdf2 -iter 80000 -salt -d -a -in $2 -out $3
+fi

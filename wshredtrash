@@ -1,0 +1,4 @@
+#!/bin/bash
+
+find -O3 ~/.local/share/Trash -maxdepth 10000 -type f -name "*" -exec shred -zu -n 5 --random-source=/dev/random --remove=wipesync {} \;
+rm -r ~/.local/share/Trash

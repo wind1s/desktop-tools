@@ -1,0 +1,42 @@
+#!/bin/bash
+
+check_mount_point() {
+	mount_point=$1
+
+	if ! grep -qs "$mount_point " /proc/mounts; then
+    echo "backup path $mount_point is not mounted! exiting..."
+		exit
+	fi
+}
+
+# Changes dir and archives the dir.
+tar_gzip() {
+	dest=$1
+	source=$2
+
+	echo "Archiving and compressing: $source -> $dest"
+	tar -C $(dirname $source) -czf $dest $source || exit 1
+}
+
+# User.
+username="$(whoami)"
+
+# Backup drive.
+bak_drive="/run/media/$username/PocketHD"
+bak_folder="$bak_drive/linux-workstation"
+
+# Files to backup.
+home_path="/home/$username"
+config_path="$home_path/.config"
+files_to_bak=("$home_path/Documents" "$home_path/dev" "$home_path/hacking" "$home_path/misc-backups" "$home_path/.mozilla" "$home_path/.bashrc" "$home_path/.bash_profile" "$home_path/.bash_aliases" "$config_path/VSCodium" "$config_path/albert" "$config_path/xfce4" "$config_path/autostart" "$config_path/libreoffice") 
+
+check_mount_point $bak_drive
+
+echo "Backing up archives"
+for file in ${files_to_bak[@]}; do
+	sync $file
+	tar_gzip "$bak_folder/$(basename $file).tar.gz" $file
+done
+
+# Flush write buffer.
+sync $bak_drive
